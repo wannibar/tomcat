@@ -4945,7 +4945,7 @@ public class StandardContext extends ContainerBase implements Context, Notificat
 
             // Load and initialize all "load on startup" servlets
             if (ok) {
-                if (!loadOnStartup(findChildren())) {
+                if (!loadOnStartup(findChildren())) {  // 启动配置了load-on-startup的Servlet
                     log.error(sm.getString("standardContext.servletFail"));
                     ok = false;
                 }

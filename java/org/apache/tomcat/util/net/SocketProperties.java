@@ -246,7 +246,7 @@ public class SocketProperties {
             socket.setReuseAddress(soReuseAddress.booleanValue());
         }
         if (soTimeout != null && soTimeout.intValue() >= 0) {
-            socket.setSoTimeout(soTimeout.intValue());
+            socket.setSoTimeout(soTimeout.intValue()); // 配置读取数据超时时间,默认20秒
         }
     }
 

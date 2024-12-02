@@ -470,9 +470,9 @@ public class HostConfig implements LifecycleListener {
         String[] filteredAppPaths = filterAppPaths(appBase.list());
         // Deploy XML descriptors from configBase
         deployDescriptors(configBase, configBase.list());
-        // Deploy WARs
+        // Deploy WARs 使用StartStopExecutor线程池(默认使用MAIN线程)部署WAR包
         deployWARs(appBase, filteredAppPaths);
-        // Deploy expanded folders
+        // Deploy expanded folders 使用StartStopExecutor线程池(默认使用MAIN线程)部署解压后的目录
         deployDirectories(appBase, filteredAppPaths);
     }
 
@@ -1020,6 +1020,7 @@ public class HostConfig implements LifecycleListener {
             context.setPath(cn.getPath());
             context.setWebappVersion(cn.getVersion());
             context.setDocBase(cn.getBaseName() + ".war");
+            // 部署war 触发Context启动
             host.addChild(context);
         } catch (Throwable t) {
             ExceptionUtils.handleThrowable(t);

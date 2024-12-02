@@ -143,11 +143,13 @@ public final class Bootstrap {
 
     private void initClassLoaders() {
         try {
+            // commonLoader的父加载器是系统类加载器AppClassLoader,遵循双亲委派机制
             commonLoader = createClassLoader("common", null);
             if (commonLoader == null) {
                 // no config file, default to this loader - we might be in a 'single' env.
                 commonLoader = this.getClass().getClassLoader();
             }
+            // 没有配置server.loader shared.loader则使用的就是commonLoader,遵循双亲委派机制
             catalinaLoader = createClassLoader("server", commonLoader);
             sharedLoader = createClassLoader("shared", commonLoader);
         } catch (Throwable t) {
@@ -268,6 +270,7 @@ public final class Bootstrap {
         if (log.isDebugEnabled()) {
             log.debug("Setting startup class properties");
         }
+
         String methodName = "setParentClassLoader";
         Class<?> paramTypes[] = new Class[1];
         paramTypes[0] = Class.forName("java.lang.ClassLoader");
@@ -439,6 +442,7 @@ public final class Bootstrap {
      */
     public static void main(String args[]) {
 
+
         synchronized (daemonLock) {
             if (daemon == null) {
                 // Don't set daemon until init() has completed
@@ -474,7 +478,9 @@ public final class Bootstrap {
                 daemon.stop();
             } else if (command.equals("start")) {
                 daemon.setAwait(true);
+                // 初始化Server
                 daemon.load(args);
+                // 启动Server
                 daemon.start();
                 if (null == daemon.getServer()) {
                     System.exit(1);

@@ -50,7 +50,7 @@ import org.apache.tomcat.util.net.Acceptor.AcceptorState;
 import org.apache.tomcat.util.net.jsse.JSSESupport;
 
 /**
- * NIO2 endpoint.
+ * NIO2 endpoint. 异步IO
  */
 public class Nio2Endpoint extends AbstractJsseEndpoint<Nio2Channel,AsynchronousSocketChannel> {
 

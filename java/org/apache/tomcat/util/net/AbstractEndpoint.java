@@ -1336,7 +1336,7 @@ public abstract class AbstractEndpoint<S,U> {
 
     public final void init() throws Exception {
         if (bindOnInit) {
-            bindWithCleanup();
+            bindWithCleanup(); // 绑定端口,配置ServerSocketChannel为非阻塞
             bindState = BindState.BOUND_ON_INIT;
         }
         if (this.domain != null) {

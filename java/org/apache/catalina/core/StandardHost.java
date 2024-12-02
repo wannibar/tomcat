@@ -775,7 +775,7 @@ public class StandardHost extends ContainerBase implements Host {
         if ((errorValve != null) && (!errorValve.equals(""))) {
             try {
                 boolean found = false;
-                Valve[] valves = getPipeline().getValves();
+                Valve[] valves = getPipeline().getValves(); // TODO pipeline valve何时初始化的
                 for (Valve valve : valves) {
                     if (errorValve.equals(valve.getClass().getName())) {
                         found = true;

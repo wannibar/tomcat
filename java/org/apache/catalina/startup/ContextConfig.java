@@ -819,6 +819,7 @@ public class ContextConfig implements LifecycleListener {
         if (docBaseAbsolute.toLowerCase(Locale.ENGLISH).endsWith(".war") && !docBaseAbsoluteFile.isDirectory()) {
             URL war = UriUtil.buildJarUrl(docBaseAbsoluteFile);
             if (unpackWARs) {
+                // 解压war包
                 docBaseAbsolute = ExpandWar.expand(host, war, pathName);
                 docBaseAbsoluteFile = new File(docBaseAbsolute);
                 if (context instanceof StandardContext) {

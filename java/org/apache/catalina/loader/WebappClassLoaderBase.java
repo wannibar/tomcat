@@ -872,7 +872,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
                         new PrivilegedFindClassByName(name);
                     clazz = AccessController.doPrivileged(dp);
                 } else {
-                    clazz = findClassInternal(name);
+                    clazz = findClassInternal(name); // 先在web应用目录下查找类
                 }
             } catch(AccessControlException ace) {
                 log.warn(sm.getString("webappClassLoader.securityException", name,
@@ -886,7 +886,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
             }
             if ((clazz == null) && hasExternalRepositories) {
                 try {
-                    clazz = super.findClass(name);
+                    clazz = super.findClass(name); // 如果在本地目录找不到的话,就交给父加载器去查找
                 } catch(AccessControlException ace) {
                     log.warn(sm.getString("webappClassLoader.securityException", name,
                             ace.getMessage()), ace);
@@ -1248,7 +1248,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
      */
     @Override
     public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-
+        // Tomcat 打破双亲委派机制的地方
         synchronized (JreCompat.isGraalAvailable() ? this : getClassLoadingLock(name)) {
             if (log.isDebugEnabled()) {
                 log.debug("loadClass(" + name + ", " + resolve + ")");
