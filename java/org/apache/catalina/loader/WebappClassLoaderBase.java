@@ -1248,6 +1248,8 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
      */
     @Override
     public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+        System.out.println(WebappClassLoaderBase.class + " : " + "load class " + name);
+
         // Tomcat 打破双亲委派机制的地方
         synchronized (JreCompat.isGraalAvailable() ? this : getClassLoadingLock(name)) {
             if (log.isDebugEnabled()) {
@@ -1258,6 +1260,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
             // Log access to stopped class loader
             checkStateForClassLoading(name);
 
+            //1. 先在本地 cache 查找该类是否已经加载过
             // (0) Check our previously loaded local class cache
             clazz = findLoadedClass0(name);
             if (clazz != null) {
@@ -1270,6 +1273,8 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
                 return clazz;
             }
 
+            //2. 从系统类加载器的 cache 中查找是否加载过
+            //
             // (0.1) Check our previously loaded class cache
             clazz = JreCompat.isGraalAvailable() ? null : findLoadedClass(name);
             if (clazz != null) {
@@ -1287,6 +1292,14 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
             //       SRV.10.7.2
             String resourceName = binaryNameToPath(name, false);
 
+            // 3. 尝试用 ExtClassLoader 类加载器类加载
+            // 目的 防止 Web 应用自己的类覆盖 JRE 的核心类。
+            // 因为 Tomcat 需要打破双亲委托机制，假如 Web 应用里自定义了一个叫 Object 的类，
+            // 如果先加载这个 Object 类，就会覆盖 JRE 里面的那个 Object 类，
+            // 这就是为什么 Tomcat 的类加载器会优先尝试用 ExtClassLoader去加载，
+            // 因为 ExtClassLoader会委托给 BootstrapClassLoader去加载，
+            // BootstrapClassLoader发现自己已经加载了 Object 类，直接返回给 Tomcat 的类加载器，
+            // 这样 Tomcat 的类加载器就不会去加载 Web 应用下的 Object 类了，也就避免了覆盖 JRE 核心类的问题。
             ClassLoader javaseLoader = getJavaseClassLoader();
             boolean tryLoadingFromJavaseLoader;
             try {
@@ -1368,6 +1381,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
                 }
             }
 
+            // 4. 尝试在本地目录搜索 class 并加载
             // (2) Search local repositories
             if (log.isDebugEnabled()) {
                 log.debug("  Searching local repositories");
@@ -1387,6 +1401,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
                 // Ignore
             }
 
+            // 5. 尝试用系统类加载器 (也就是 AppClassLoader) 来加载
             // (3) Delegate to parent unconditionally
             if (!delegateLoad) {
                 if (log.isDebugEnabled()) {
@@ -1409,6 +1424,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
             }
         }
 
+        //6. 上述过程都加载失败，抛出异常
         throw new ClassNotFoundException(name);
     }
 
