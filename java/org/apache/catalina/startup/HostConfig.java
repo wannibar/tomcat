@@ -295,7 +295,7 @@ public class HostConfig implements LifecycleListener {
     @Override
     public void lifecycleEvent(LifecycleEvent event) {
 
-        // Identify the host we are associated with
+        // StandardHost启动后，触发start事件，调用HostConfig这个Listener启动服务
         try {
             host = (Host) event.getLifecycle();
             if (host instanceof StandardHost) {

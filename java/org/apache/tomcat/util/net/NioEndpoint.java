@@ -273,7 +273,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel,SocketChannel> 
             serverSock = ServerSocketChannel.open();
             socketProperties.setProperties(serverSock.socket());
             InetSocketAddress addr = new InetSocketAddress(getAddress(), getPortWithOffset());
-            serverSock.bind(addr, getAcceptCount()); // 初始化时进行了端口绑定
+            serverSock.bind(addr, getAcceptCount()); // 初始化时进行了端口绑定, 并配置backlog参数
         }
         serverSock.configureBlocking(true); //mimic APR behavior
     }

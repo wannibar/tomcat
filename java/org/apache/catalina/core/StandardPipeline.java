@@ -168,6 +168,7 @@ public class StandardPipeline extends LifecycleBase implements Pipeline {
         }
         while (current != null) {
             if (current instanceof Lifecycle) {
+                System.out.println("start in " + this.toString() + " ready to start " + current.toString());
                 ((Lifecycle) current).start();
             }
             current = current.getNext();
@@ -319,7 +320,7 @@ public class StandardPipeline extends LifecycleBase implements Pipeline {
      */
     @Override
     public void addValve(Valve valve) {
-
+        // 始终插入到Value链表的最后1个的前面，最后一个Valve即为变量basic, 比如StandardHost的Valve链表，basic为StandardHostValve
         // Validate that we can add this Valve
         if (valve instanceof Contained) {
             ((Contained) valve).setContainer(this.container);

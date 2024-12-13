@@ -495,6 +495,7 @@ public class Catalina {
         digester.addRuleSet(new NamingRuleSet("Server/Service/Engine/Host/Context/"));
 
         // When the 'engine' is found, set the parentClassLoader.
+        // 在解析Engine节点的时候，设置parentClassLoader为Catalina.class的类加载器, parentClassLoader为sharedClassLoader
         digester.addRule("Server/Service/Engine",
                          new SetParentClassLoaderRule(parentClassLoader));
         addClusterRuleSet(digester, "Server/Service/Engine/Cluster/");
@@ -614,6 +615,7 @@ public class Catalina {
                     digester.startGeneratingCode();
                     generateClassHeader(digester, start);
                 }
+                // 比较重要的一行代码，当digester已经建立好xml标签之间的关系后，这里就开始解析xml 了
                 digester.parse(inputSource);
                 if (generateCode) {
                     generateClassFooter(digester);
@@ -706,12 +708,14 @@ public class Catalina {
         initNaming();
 
         // Parse main server.xml
-        parseServerXml(true);
+        parseServerXml(true); // 初始化server.xml文件解析器
+        // 解析完server.xml或server-embed.xml后，将catalina设置到StandardServer中
         Server s = getServer();
         if (s == null) {
             return;
         }
 
+        // 解析完server.xml或server-embed.xml后，将catalina设置到StandardServer中
         getServer().setCatalina(this);
         getServer().setCatalinaHome(Bootstrap.getCatalinaHomeFile());
         getServer().setCatalinaBase(Bootstrap.getCatalinaBaseFile());
@@ -721,6 +725,7 @@ public class Catalina {
 
         // Start the new server
         try {
+            // 解析完配置文件，开始初始化Server，而从初始化Server开始，就包括了一系列的子组件的初始化
             getServer().init();
         } catch (LifecycleException e) {
             if (Boolean.getBoolean("org.apache.catalina.startup.EXIT_ON_INIT_FAILURE")) {
@@ -769,7 +774,7 @@ public class Catalina {
 
         // Start the new server
         try {
-            getServer().start();
+            getServer().start(); // 启动
         } catch (LifecycleException e) {
             log.fatal(sm.getString("catalina.serverStartFail"), e);
             try {
@@ -805,9 +810,9 @@ public class Catalina {
                         false);
             }
         }
-
+        // 是否需要阻塞，await标记是在通过Bootstrap类启动时设置为true的
         if (await) {
-            await();
+            await(); // 使用ServerSocket来监听shutdown命令来阻塞
             stop();
         }
     }

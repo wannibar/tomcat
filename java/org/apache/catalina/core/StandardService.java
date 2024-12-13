@@ -538,6 +538,9 @@ public class StandardService extends LifecycleMBeanBase implements Service {
         }
 
         // Initialize any Executors
+        // 初始化线程池
+        // 可以在Service下配置定义executor，默认实现类为org.apache.catalina.core.StandardThreadExecutor
+        // 这个初始化只是走了一下生命周期的初始化流程，没有其他作用
         for (Executor executor : findExecutors()) {
             if (executor instanceof JmxEnabled) {
                 ((JmxEnabled) executor).setDomain(getDomain());

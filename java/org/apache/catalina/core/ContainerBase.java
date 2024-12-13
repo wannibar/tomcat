@@ -860,7 +860,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase implements Contai
         }
 
         // Start our child containers, if any
-        Container[] children = findChildren();
+        Container[] children = findChildren(); // 默认是Engine的child即Host
         List<Future<Void>> results = new ArrayList<>(children.length);
         for (Container child : children) {
             // 默认是以main线程来启动的
@@ -1331,6 +1331,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase implements Contai
 
         @Override
         public Void call() throws LifecycleException {
+            System.out.println("ready to start in StartChild" + child);
             child.start();
             return null;
         }
