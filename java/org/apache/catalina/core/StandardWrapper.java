@@ -85,6 +85,9 @@ public class StandardWrapper extends ContainerBase implements ServletConfig, Wra
     public StandardWrapper() {
 
         super();
+        // 【注意】StandardWrapper 类的构造函数将一个StandardWrapperValue 作为它的基本阀门
+        // 本章关注的是一个servlet 被调用的时候发生的细节，因此我们需要看StandardWrapper 和StandardWrapperValue 类，
+        // 在学习它们之前，我们需要首先关注下，javax.servlet.SignleThreaadModel ，理解该接口对于理解一个包装器是如何工作的非常重要 。
         swValve = new StandardWrapperValve();
         pipeline.setBasic(swValve);
         broadcaster = new NotificationBroadcasterSupport();
@@ -1017,6 +1020,8 @@ public class StandardWrapper extends ContainerBase implements ServletConfig, Wra
 
             InstanceManager instanceManager = ((StandardContext) getParent()).getInstanceManager();
             try {
+                // 有了类加载器和要加载的 Servlet 名字，就可以使用 loadServlet 方法来加载类 了。
+                // 1. 创建Servlet实例，如果添加了JNDI 注解，将进行依赖注入
                 servlet = (Servlet) instanceManager.newInstance(servletClass);
             } catch (ClassCastException e) {
                 unavailable(null);
@@ -1038,6 +1043,8 @@ public class StandardWrapper extends ContainerBase implements ServletConfig, Wra
             }
 
             if (multipartConfigElement == null) {
+                // 2. 读取javax.servlet.annotation.MultipartConfig配置，以用于multipart/form-data请求处理，
+                // 包括临时文件存储路径 上传文件最大字节数，请求最大字节数，文件大小阈值。
                 MultipartConfig annotation = servlet.getClass().getAnnotation(MultipartConfig.class);
                 if (annotation != null) {
                     multipartConfigElement = new MultipartConfigElement(annotation);
@@ -1047,6 +1054,11 @@ public class StandardWrapper extends ContainerBase implements ServletConfig, Wra
             // Special handling for ContainerServlet instances
             // Note: The InstanceManager checks if the application is permitted
             // to load ContainerServlets
+            // 如果通过了安全性检查，接下来检查该 Servlet 是否是一个 ContainerServlet。
+            // ContainerServlet 是实现了 org.apache.catalina.ContainerServlet
+            // 接口的 Servlet，它可以访问 Catalina 的内部函数。
+            // 如果该 Servlet 是 ContainerServlet，loadServlet 方法调用 ContainerServlet 的 setWrapper
+            // 方法，传递该 StandardWrapper 实例。
             if (servlet instanceof ContainerServlet) {
                 ((ContainerServlet) servlet).setWrapper(this);
             }
@@ -1060,6 +1072,7 @@ public class StandardWrapper extends ContainerBase implements ServletConfig, Wra
                 singleThreadModel = true;
             }
 
+            // 4. 初始化servlet
             initServlet(servlet);
 
             fireContainerEvent("load", this);
@@ -1103,7 +1116,12 @@ public class StandardWrapper extends ContainerBase implements ServletConfig, Wra
                     }
                 }
             } else {
-                servlet.init(facade);
+                // 因此，当 StandardWrapper 对象调用 Servlet 实例的 init 方法的时候，
+                // 它传递 的是一个 StandardWrapperFacade 对象。
+                // 在 Servlet 内部调用 ServletConfig 的 getServletName, getInitParameter,
+                // 和 getInitParameterNames 方法只需
+                // 要调用它们在 StandardWrapper 的实现就行。
+                servlet.init(facade); // 调用Servlet init方法
             }
 
             instanceInitialized = true;

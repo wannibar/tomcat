@@ -979,7 +979,7 @@ public class Connector extends LifecycleMBeanBase {
             throw new LifecycleException(sm.getString("coyoteConnector.protocolHandlerInstantiationFailed"));
         }
 
-        // 将协议和CoyoteAdapter绑定
+        // 创建连接器与容器的桥梁 将协议和CoyoteAdapter绑定
         // Initialize adapter
         adapter = new CoyoteAdapter(this);
         protocolHandler.setAdapter(adapter);
@@ -1007,7 +1007,7 @@ public class Connector extends LifecycleMBeanBase {
         }
 
         try {
-            protocolHandler.init();
+            protocolHandler.init(); // 协议初始化，里面会Listen端口
         } catch (Exception e) {
             throw new LifecycleException(sm.getString("coyoteConnector.protocolHandlerInitializationFailed"), e);
         }

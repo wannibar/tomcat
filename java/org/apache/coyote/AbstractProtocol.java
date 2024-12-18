@@ -651,7 +651,7 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler, MBeanRegis
         endpoint.setName(endpointName.substring(1, endpointName.length() - 1));
         endpoint.setDomain(domain);
 
-        endpoint.init();
+        endpoint.init();  // endpoint启动
     }
 
 
@@ -929,6 +929,7 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler, MBeanRegis
                 do {
                     // 真正的处理入口
                     state = processor.process(wrapper, status);
+                    System.out.println("state=" + state + " after processor.process(wrapper, status) wrapper = " + wrapper + ": status " + status);
 
                     if (state == SocketState.UPGRADING) {
                         // Get the HTTP upgrade handler

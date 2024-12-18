@@ -189,6 +189,7 @@ public class MapperListener extends LifecycleMBeanBase implements ContainerListe
             String wrapperName = wrapper.getName();
             String mapping = (String) event.getData();
             boolean jspWildCard = ("jsp".equals(wrapperName) && mapping.endsWith("/*"));
+            // 在Mapper中添加映射关系
             mapper.addWrapper(hostName, contextPath, version, mapping, wrapper, jspWildCard,
                     context.isResourceOnlyServlet(wrapperName));
         } else if (Wrapper.REMOVE_MAPPING_EVENT.equals(event.getType())) {

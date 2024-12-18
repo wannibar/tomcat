@@ -3043,7 +3043,7 @@ public class StandardContext extends ContainerBase implements Context, Notificat
             servletMappings.put(adjustedPattern, name);
         }
         Wrapper wrapper = (Wrapper) findChild(name);
-        wrapper.addMapping(adjustedPattern);
+        wrapper.addMapping(adjustedPattern);  // 将pattern添加到StandardWrapper的mappings属性中
 
         fireContainerEvent("addServletMapping", adjustedPattern);
     }
@@ -3558,7 +3558,7 @@ public class StandardContext extends ContainerBase implements Context, Notificat
      */
     @Override
     public synchronized void reload() {
-
+        // 热部署
         // Validate our current component state
         if (!getState().isAvailable()) {
             throw new IllegalStateException(sm.getString("standardContext.notStarted", getName()));
@@ -3572,13 +3572,13 @@ public class StandardContext extends ContainerBase implements Context, Notificat
         setPaused(true);
 
         try {
-            stop();
+            stop(); // 停止StandardContext
         } catch (LifecycleException e) {
             log.error(sm.getString("standardContext.stoppingContext", getName()), e);
         }
 
         try {
-            start();
+            start(); // 启动StandardContext
         } catch (LifecycleException e) {
             log.error(sm.getString("standardContext.startingContext", getName()), e);
         }
@@ -4638,6 +4638,7 @@ public class StandardContext extends ContainerBase implements Context, Notificat
         for (ArrayList<Wrapper> list : map.values()) {
             for (Wrapper wrapper : list) {
                 try {
+                    // 启动Wrapper 即启动Servlet
                     wrapper.load();
                 } catch (ServletException e) {
                     getLogger().error(
@@ -4687,7 +4688,7 @@ public class StandardContext extends ContainerBase implements Context, Notificat
         if (namingResources != null) {
             namingResources.start();
         }
-
+        // 启动context
         // Post work directory
         postWorkDirectory();
 
@@ -4764,7 +4765,7 @@ public class StandardContext extends ContainerBase implements Context, Notificat
         try {
             if (ok) {
                 // Start our subordinate components, if any
-                Loader loader = getLoader();
+                Loader loader = getLoader(); // 获取Context加载器，并启动
                 if (loader instanceof Lifecycle) {
                     ((Lifecycle) loader).start();
                 }
@@ -4901,6 +4902,7 @@ public class StandardContext extends ContainerBase implements Context, Notificat
             // Call ServletContainerInitializers
             for (Map.Entry<ServletContainerInitializer,Set<Class<?>>> entry : initializers.entrySet()) {
                 try {
+                    // Context容器启动时就会分别调用每个ServletContainerInitializer的onStartup()方法，将感兴趣的类作为参数传入
                     entry.getKey().onStartup(entry.getValue(), getServletContext());
                 } catch (ServletException e) {
                     log.error(sm.getString("standardContext.sciFail"), e);
@@ -5269,7 +5271,7 @@ public class StandardContext extends ContainerBase implements Context, Notificat
         if (!getState().isAvailable()) {
             return;
         }
-
+        // 热加载
         Loader loader = getLoader();
         if (loader != null) {
             try {

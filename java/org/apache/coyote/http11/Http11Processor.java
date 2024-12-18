@@ -258,8 +258,8 @@ public class Http11Processor extends AbstractProcessor {
         while (!getErrorState().isError() && keepAlive && !isAsync() && upgradeToken == null &&
                 sendfileState == SendfileState.DONE && !protocol.isPaused()) {
 
-            // 解析HTTP协议
-
+            // ------------------------ 解析HTTP协议 ------------------------
+            // 解析请求行
             // Parsing the request header
             try {
                 if (!inputBuffer.parseRequestLine(keptAlive, protocol.getConnectionTimeout(),
@@ -288,7 +288,7 @@ public class Http11Processor extends AbstractProcessor {
                     // Set this every time in case limit has been changed via JMX
                     request.getMimeHeaders().setLimit(protocol.getMaxHeaderCount());
                     // Don't parse headers for HTTP/0.9
-                    if (!http09 && !inputBuffer.parseHeaders()) {
+                    if (!http09 && !inputBuffer.parseHeaders()) { // 解析请求头
                         // We've read part of the request, don't recycle it
                         // instead associate it with the socket
                         openSocket = true;
@@ -369,6 +369,7 @@ public class Http11Processor extends AbstractProcessor {
                 // Setting up filters, and parse some request headers
                 rp.setStage(org.apache.coyote.Constants.STAGE_PREPARE);
                 try {
+                    // 预处理, 主要从请求中处理处keepAlive属性，以及进行一些验证，以及根据请求分析得到ActiveInputFilter
                     prepareRequest();
                 } catch (Throwable t) {
                     ExceptionUtils.handleThrowable(t);
@@ -393,7 +394,9 @@ public class Http11Processor extends AbstractProcessor {
             // Process the request in the adapter
             if (getErrorState().isIoAllowed()) {
                 try {
+                    // 设置请求的状态为服务状态，表示正在处理请求
                     rp.setStage(org.apache.coyote.Constants.STAGE_SERVICE);
+                    // 交给容器处理请求
                     // 准备好了Request Response对象通过CoyoteAdapter发送给tomcat后端组件
                     // 层层传递到Servlet的service方法
                     getAdapter().service(request, response);

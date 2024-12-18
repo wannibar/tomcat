@@ -295,7 +295,7 @@ public class HostConfig implements LifecycleListener {
     @Override
     public void lifecycleEvent(LifecycleEvent event) {
 
-        // StandardHost启动后，触发start事件，调用HostConfig这个Listener启动服务
+        // StandardHost启动后，触发start事件，调用HostConfig这个Listener启动服务，设置一堆bool属性
         try {
             host = (Host) event.getLifecycle();
             if (host instanceof StandardHost) {
@@ -315,7 +315,7 @@ public class HostConfig implements LifecycleListener {
         } else if (event.getType().equals(Lifecycle.BEFORE_START_EVENT)) {
             beforeStart();
         } else if (event.getType().equals(Lifecycle.START_EVENT)) {
-            start();
+            start(); // 处理START事件
         } else if (event.getType().equals(Lifecycle.STOP_EVENT)) {
             stop();
         }
@@ -1071,7 +1071,7 @@ public class HostConfig implements LifecycleListener {
 
         ExecutorService es = host.getStartStopExecutor();
         List<Future<?>> results = new ArrayList<>();
-
+        // 使用线程池并发部署web应用(默认只有1线程,且为主线程)
         for (String file : files) {
             if (file.equalsIgnoreCase("META-INF")) {
                 continue;
@@ -1122,7 +1122,7 @@ public class HostConfig implements LifecycleListener {
      * @param dir The path to the root folder of the webapp
      */
     protected void deployDirectory(ContextName cn, File dir) {
-
+        // 部署应用
         long startTime = 0;
         // Deploy the application in this directory
         if( log.isInfoEnabled() ) {
@@ -1171,10 +1171,11 @@ public class HostConfig implements LifecycleListener {
                 log.error(sm.getString("hostConfig.deployDescriptor.blocked", cn.getPath(), xml, xmlCopy));
                 context = new FailedContext();
             } else {
+                // contextClass的默认值是org.apache.catalina.core.StandardContext
                 context = (Context) Class.forName(contextClass).getConstructor().newInstance();
             }
 
-            Class<?> clazz = Class.forName(host.getConfigClass());
+            Class<?> clazz = Class.forName(host.getConfigClass()); // 默认值是 org.apache.catalina.startup.ContextConfig
             LifecycleListener listener = (LifecycleListener) clazz.getConstructor().newInstance();
             context.addLifecycleListener(listener);
 
@@ -1182,7 +1183,7 @@ public class HostConfig implements LifecycleListener {
             context.setPath(cn.getPath());
             context.setWebappVersion(cn.getVersion());
             context.setDocBase(cn.getBaseName());
-            host.addChild(context);
+            host.addChild(context); // 注意内部会启动Context
         } catch (Throwable t) {
             ExceptionUtils.handleThrowable(t);
             log.error(sm.getString("hostConfig.deployDir.error", dir.getAbsolutePath()), t);
@@ -1615,7 +1616,7 @@ public class HostConfig implements LifecycleListener {
         }
 
         if (host.getDeployOnStartup()) {
-            deployApps();
+            deployApps(); // 部署应用
         }
     }
 
@@ -1914,7 +1915,7 @@ public class HostConfig implements LifecycleListener {
             }
         }
     }
-
+    // 真正部署web应用的任务
     private static class DeployDirectory implements Runnable {
 
         private HostConfig config;

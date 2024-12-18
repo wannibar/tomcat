@@ -129,6 +129,7 @@ public class Acceptor<U> implements Runnable {
                         // socket
                         // Acceptor线程接收请求,然后阻塞在此处
                         socket = endpoint.serverSocketAccept();
+                        System.out.println("Acceptor线程接收请求" + socket);
                     } catch (Exception ioe) {
                         // We didn't get a socket
                         endpoint.countDownConnection(); // 最大连接统计-1
@@ -148,7 +149,7 @@ public class Acceptor<U> implements Runnable {
                     if (!stopCalled && !endpoint.isPaused()) {
                         // setSocketOptions() will hand the socket off to
                         // an appropriate processor if successful
-                        // 放入到一个Map中
+                        // 放入到一个Map中  内部会交给Poller处理该Socket
                         if (!endpoint.setSocketOptions(socket)) {
                             endpoint.closeSocket(socket);
                         }

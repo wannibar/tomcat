@@ -1578,7 +1578,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
      */
     @Override
     public void start() throws LifecycleException {
-
+        // 遍历WEB-INF下的classes和lib目录，并添加到localRepositories中，并设置对应的时间戳
         state = LifecycleState.STARTING_PREP;
 
         WebResource[] classesResources = resources.getResources("/WEB-INF/classes");

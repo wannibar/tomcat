@@ -687,7 +687,7 @@ public class StandardRoot extends LifecycleMBeanBase implements WebResourceRoot 
 
         for (List<WebResourceSet> list : allResources) {
             for (WebResourceSet webResourceSet : list) {
-                webResourceSet.init();
+                webResourceSet.init(); // 初始化
             }
         }
     }
@@ -712,7 +712,7 @@ public class StandardRoot extends LifecycleMBeanBase implements WebResourceRoot 
             // Skip class resources since they are started below
             if (list != classResources) {
                 for (WebResourceSet webResourceSet : list) {
-                    webResourceSet.start();
+                    webResourceSet.start(); // 启动应用
                 }
             }
         }

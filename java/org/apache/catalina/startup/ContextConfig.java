@@ -1507,6 +1507,7 @@ public class ContextConfig implements LifecycleListener {
         for (ContextService service : webxml.getServiceRefs().values()) {
             context.getNamingResources().addService(service);
         }
+        // 遍历所有的servlet,创建wrapper
         for (ServletDef servlet : webxml.getServlets().values()) {
             Wrapper wrapper = context.createWrapper();
             // Description is ignored
@@ -1560,8 +1561,10 @@ public class ContextConfig implements LifecycleListener {
                         servlet.getAsyncSupported().booleanValue());
             }
             wrapper.setOverridable(servlet.isOverridable());
+            // 把wrapper添加到context中去
             context.addChild(wrapper);
         }
+        // 把mapping关系添加到context中去
         for (Entry<String, String> entry :
                 webxml.getServletMappings().entrySet()) {
             context.addServletMappingDecoded(entry.getKey(), entry.getValue());
@@ -1842,6 +1845,10 @@ public class ContextConfig implements LifecycleListener {
 
         List<ServletContainerInitializer> detectedScis;
         try {
+            // 1. Tomcat容器的ServletContainerInitializer机制，主要交由Context 容器和ContextConfig监听器共同实现，
+            // ContextConfig监听器首先负责在容器启动时读取每个Web应用的WEB-INF/lib目录下包含的Jar包的META-INF/lib/javax.servlet.ServletContainerInitializer
+            // 2. 以及Web根目录下的META-INF/services/javax.servlet.ServletContainerInitializer ,
+            // 通过反射完成这些ServletContainerInitializer的实例化，然后再设置到Context 容器中
             WebappServiceLoader<ServletContainerInitializer> loader = new WebappServiceLoader<>(context);
             detectedScis = loader.load(ServletContainerInitializer.class);
         } catch (IOException e) {

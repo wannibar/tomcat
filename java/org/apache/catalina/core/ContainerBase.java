@@ -655,7 +655,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase implements Contai
             PrivilegedAction<Void> dp = new PrivilegedAddChild(child);
             AccessController.doPrivileged(dp);
         } else {
-            addChildInternal(child);
+            addChildInternal(child); // 内部会启动Context
         }
     }
 
@@ -680,7 +680,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase implements Contai
         // locking the children object can cause problems elsewhere
         try {
             if ((getState().isAvailable() || LifecycleState.STARTING_PREP.equals(getState())) && startChildren) {
-                child.start();
+                child.start(); // 启动Context
             }
         } catch (LifecycleException e) {
             throw new IllegalStateException(sm.getString("containerBase.child.start"), e);
@@ -890,7 +890,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase implements Contai
         if (pipeline instanceof Lifecycle) {
             ((Lifecycle) pipeline).start();
         }
-
+        // 这个时候会触发START_EVENT事件，会进行deployApps
         setState(LifecycleState.STARTING);
 
         // Start our thread
@@ -1090,7 +1090,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase implements Contai
         Valve current = pipeline.getFirst();
         while (current != null) {
             try {
-                current.backgroundProcess();
+                current.backgroundProcess(); // 遍历容器的所有管道，调用其backgroundProcess()方法
             } catch (Exception e) {
                 log.warn(sm.getString("containerBase.backgroundProcess.valve", current), e);
             }

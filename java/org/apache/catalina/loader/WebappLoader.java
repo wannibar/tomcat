@@ -301,6 +301,8 @@ public class WebappLoader extends LifecycleMBeanBase
      */
     @Override
     public void backgroundProcess() {
+        // StandardContext 定义了 reloadable 属性来标识是否支持应用程序的重加载。 当允许重加载的时候，
+        // 当 web.xml 或者 WEB-INF/classes 目录下的文件被改变的 时候会重加载。
         if (reloadable && modified()) {
             Thread currentThread = Thread.currentThread();
             try {
