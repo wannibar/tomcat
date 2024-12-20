@@ -38,6 +38,7 @@ public class HelloWorldExample extends HttpServlet {
                       HttpServletResponse response)
         throws IOException, ServletException
     {
+        System.out.println("HelloWorldExample loader " + HelloWorldExample.class.getClassLoader() + "");
         ResourceBundle rb =
             ResourceBundle.getBundle("LocalStrings",request.getLocale());
         response.setContentType("text/html");

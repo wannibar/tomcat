@@ -1249,6 +1249,9 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
     @Override
     public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
         System.out.println(WebappClassLoaderBase.class + " : " + "load class " + name);
+        if(name.contains("HelloWorldExample")){
+            System.out.println("----");
+        }
 
         // Tomcat 打破双亲委派机制的地方
         synchronized (JreCompat.isGraalAvailable() ? this : getClassLoadingLock(name)) {
@@ -1360,6 +1363,8 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
 
             boolean delegateLoad = delegate || filter(name, true);
 
+            // 4 根据 delegate 属性和其他条件判断是否应该委派加载给父类加载器。
+            // 如果需要委派，则直接先进行委派
             // (1) Delegate to our parent if requested
             if (delegateLoad) {
                 if (log.isDebugEnabled()) {
@@ -1381,7 +1386,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
                 }
             }
 
-            // 4. 尝试在本地目录搜索 class 并加载
+            // 5. 尝试在本地目录搜索 class 并加载, 这里就是再用WebappClassLoader加载
             // (2) Search local repositories
             if (log.isDebugEnabled()) {
                 log.debug("  Searching local repositories");
@@ -1401,7 +1406,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
                 // Ignore
             }
 
-            // 5. 尝试用系统类加载器 (也就是 AppClassLoader) 来加载
+            // 6. 尝试用common加载器 (也就是 commonClassLoader) 来加载，注意这里是遵循双亲委派机制
             // (3) Delegate to parent unconditionally
             if (!delegateLoad) {
                 if (log.isDebugEnabled()) {
@@ -1409,6 +1414,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
                 }
                 try {
                     clazz = Class.forName(name, false, parent);
+                    System.out.println(clazz + " loader is " + clazz.getClassLoader());
                     if (clazz != null) {
                         if (log.isDebugEnabled()) {
                             log.debug("  Loading class from parent");
